@@ -9,27 +9,27 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-public class GameDetailResponse {
+public class GameSummaryResponse {
     private final Long id;
     private final String playerName;
     private final int currentHp;
     private final int currentFloor;
     private final GamePhase phase;
     private final GameStatus status;
-    private final List<CardResponse> deck;
+    private final int deckSize;
     private final LocalDateTime createdAt;
-    private final LocalDateTime updatedAt;
+    private final LocalDateTime modifiedAt;
 
-    public GameDetailResponse(
-        Long id,
-        String playerName,
-        int currentHp,
-        int currentFloor,
-        GamePhase phase,
-        GameStatus status,
-        List<CardResponse> deck,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+    public GameSummaryResponse(
+            Long id,
+            String playerName,
+            int currentHp,
+            int currentFloor,
+            GamePhase phase,
+            GameStatus status,
+            int deckSize,
+            LocalDateTime createdAt,
+            LocalDateTime modifiedAt
     ) {
         this.id = id;
         this.playerName = playerName;
@@ -37,8 +37,8 @@ public class GameDetailResponse {
         this.currentFloor = currentFloor;
         this.phase = phase;
         this.status = status;
-        this.deck = List.copyOf(deck);
+        this.deckSize = deckSize;
         this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.modifiedAt = modifiedAt;
     }
 }
