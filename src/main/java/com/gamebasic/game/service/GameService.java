@@ -97,7 +97,7 @@ public class GameService {
 
     @Transactional(readOnly = true)
     public List<GameSummaryResponse> getGames() {
-        List<Game> games = gameRepository.findAll();
+        List<Game> games = gameRepository.findAllByOrderByIdDesc();
 
         List<GameSummaryResponse> gameSummaryResponses = new ArrayList<>();
         for (Game game : games) {
