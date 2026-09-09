@@ -1,5 +1,7 @@
 package com.gamebasic.game.service;
 
+import com.gamebasic.common.exception.GameFinishedException;
+import com.gamebasic.common.exception.GameNotFoundException;
 import com.gamebasic.game.dto.*;
 import com.gamebasic.game.entity.Game;
 import com.gamebasic.game.repository.GameRepository;
@@ -56,14 +58,14 @@ public class GameService {
 
     private Game findGame(Long gameId) {
         return gameRepository.findById(gameId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+            .orElseThrow(() -> new GameNotFoundException(gameId));
     }
 
     @Transactional
     public GameDetailResponse updateProgress(Long gameId, ProgressRequest request) {
         Game game = findGame(gameId);
         if(game.isFinished()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT);
+            throw new GameFinishedException(gameId);
         }
 
         game.updateProgress(
@@ -122,9 +124,7 @@ public class GameService {
     // TODO (Lv 7): 게임 상세 조회. 주석을 풀고 구현하세요.
      @Transactional(readOnly = true)
      public GameDetailResponse getGame(Long gameId) {
-         Game game = gameRepository.findById(gameId).orElseThrow(
-                 () -> new IllegalArgumentException("게임을 찾을 수 없습니다.")
-         );
+         Game game = findGame(gameId);
 
          List<RunCard> cards = runCardRepository.findAllByGameOrderByIdAsc(game);
          List<CardResponse> deck = new ArrayList<>();
@@ -148,20 +148,14 @@ public class GameService {
     // TODO (Lv 8): 플레이어 이름 변경 — 변경 감지로 수정
     @Transactional
     public void renameGame(Long gameId, @Valid RenameRequest request) {
-        Game game = gameRepository.findById(gameId).orElseThrow(
-                () -> new IllegalArgumentException("게임을 찾을 수 없습니다.")
-        );
-
+        Game game = findGame(gameId);
         game.rename(request.getPlayerName());
     }
 
     // TODO (Lv 8): 게임 삭제
     @Transactional
     public void deleteGame(Long gameId) {
-        Game game = gameRepository.findById(gameId).orElseThrow(
-                () -> new IllegalArgumentException("게임을 찾을 수 없습니다.")
-        );
-
+        Game game = findGame(gameId);
         runCardRepository.deleteAllByGame(game);
         gameRepository.delete(game);
     }
