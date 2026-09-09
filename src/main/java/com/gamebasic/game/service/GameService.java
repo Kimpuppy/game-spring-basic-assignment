@@ -6,6 +6,7 @@ import com.gamebasic.game.dto.*;
 import com.gamebasic.game.entity.Game;
 import com.gamebasic.game.repository.GameRepository;
 import com.gamebasic.runcard.dto.CardResponse;
+import com.gamebasic.runcard.dto.DeckCount;
 import com.gamebasic.runcard.dto.RunCardRequest;
 import com.gamebasic.runcard.entity.RunCard;
 import com.gamebasic.runcard.repository.RunCardRepository;
@@ -18,6 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -100,9 +103,11 @@ public class GameService {
         List<Game> games = gameRepository.findAllByOrderByIdDesc();
 
         List<GameSummaryResponse> gameSummaryResponses = new ArrayList<>();
-        for (Game game : games) {
-            List<RunCard> cards = runCardRepository.findAllByGameOrderByIdAsc(game);
+        List<DeckCount> deckCounts = runCardRepository.countByGames(games);
+        Map<Long, Long> deckCountsByGameId = deckCounts.stream()
+                .collect(Collectors.toMap(DeckCount::getGameId, DeckCount::getCount));
 
+        for (Game game : games) {
             GameSummaryResponse gameSummaryResponse = new GameSummaryResponse(
                     game.getId(),
                     game.getPlayerName(),
@@ -110,7 +115,7 @@ public class GameService {
                     game.getCurrentFloor(),
                     game.getPhase(),
                     game.getStatus(),
-                    cards.size(),
+                    deckCountsByGameId.getOrDefault(game.getId(), 0L).intValue(),
                     game.getCreatedAt(),
                     game.getUpdatedAt()
             );
