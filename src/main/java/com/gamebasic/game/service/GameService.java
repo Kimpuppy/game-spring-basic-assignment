@@ -1,27 +1,21 @@
 package com.gamebasic.game.service;
 
-import com.gamebasic.game.dto.CreateRequest;
-import com.gamebasic.game.dto.GameDetailResponse;
-import com.gamebasic.game.dto.GameSummaryResponse;
-import com.gamebasic.game.dto.ProgressRequest;
+import com.gamebasic.game.dto.*;
 import com.gamebasic.game.entity.Game;
-import com.gamebasic.game.entity.GamePhase;
-import com.gamebasic.game.entity.GameStatus;
 import com.gamebasic.game.repository.GameRepository;
 import com.gamebasic.runcard.dto.CardResponse;
 import com.gamebasic.runcard.dto.RunCardRequest;
 import com.gamebasic.runcard.entity.RunCard;
 import com.gamebasic.runcard.repository.RunCardRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -148,5 +142,23 @@ public class GameService {
      }
 
     // TODO (Lv 8): 플레이어 이름 변경 — 변경 감지로 수정
+    @Transactional
+    public void renameGame(Long gameId, @Valid RenameRequest request) {
+        Game game = gameRepository.findById(gameId).orElseThrow(
+                () -> new IllegalArgumentException("게임을 찾을 수 없습니다.")
+        );
+
+        game.rename(request.getPlayerName());
+    }
+
     // TODO (Lv 8): 게임 삭제
+    @Transactional
+    public void deleteGame(Long gameId) {
+        Game game = gameRepository.findById(gameId).orElseThrow(
+                () -> new IllegalArgumentException("게임을 찾을 수 없습니다.")
+        );
+
+        runCardRepository.deleteAllByGame(game);
+        gameRepository.delete(game);
+    }
 }
